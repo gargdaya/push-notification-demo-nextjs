@@ -1,8 +1,41 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import Head from "next/head";
+import Image from "next/image";
+import styles from "../styles/Home.module.css";
+import { useEffect } from "react";
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, "+")
+    .replace(/_/g, "/");
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}    
 
 export default function Home() {
+  useEffect(() => {
+    navigator.serviceWorker
+      .register("serviceworker.js")
+      .then(function (registration) {
+        console.log("Service worker successfully registered.");
+        registration.pushManager.subscribe({
+          userVisibleOnly:true,
+          applicationServerKey:urlBase64ToUint8Array("BPlYVfWGrXmRBzbJvgOW-W2tjFHuN3oj1ro2LkOpKFgws6dx05oTY_Fx7qfTQPThO6vqzgC3ktAp2SZr-UzZqkw")
+        }).then((endpoint)=>{
+          console.log(endpoint);
+        })
+      })
+      .catch(function (err) {
+        console.error("Unable to register service worker.", err);
+      });
+  }, []);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -17,7 +50,7 @@ export default function Home() {
         </h1>
 
         <p className={styles.description}>
-          Get started by editing{' '}
+          Get started by editing{" "}
           <code className={styles.code}>pages/index.js</code>
         </p>
 
@@ -58,12 +91,12 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{' '}
+          Powered by{" "}
           <span className={styles.logo}>
             <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
           </span>
         </a>
       </footer>
     </div>
-  )
+  );
 }
